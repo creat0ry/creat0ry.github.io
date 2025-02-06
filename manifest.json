@@ -1,0 +1,20 @@
+{
+  "short_name": "eGov",
+  "name": "eGov Mobile",
+  "icons": [
+    {
+      "src": "egovMobileIcon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpg"
+    },
+    {
+      "src": "egovMobileIcon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpg"
+    }
+  ],
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000"
+}
