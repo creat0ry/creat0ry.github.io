@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="eGov mobile">
+  <title>Удостоверение личности</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #fff;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    /* Шапка – всегда поверх остального */
+    .header-container {
+      position: fixed; /* Фиксированное положение */
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: white; /* Белый фон */
+      z-index: 100; /* Убедимся, что элемент выше всех */
+    }
+    .header-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .back-button {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: white;
+      padding: 10px;
+    }
+    /* Контейнер загрузки – ниже шапки */
+    .upload-box {
+      padding-top: 30%;
+      width: 86%;
+      height: 60vh;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      cursor: pointer;
+      position: relative;
+      z-index: 1; /* ниже чем шапка и нижнее изображение */
+    }
+    .upload-box img {
+      max-width: 100%;
+      max-height: 100%;
+      transform: scale(1);
+      transition: transform 0.1s ease-out;
+      /* Определяем центр масштабирования */
+      transform-origin: center center;
+    }
+    /* Нижнее изображение – всегда поверх загрузки */
+    .bottom-img {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      display: block;
+      padding-top: 16.7vh;
+      padding-bottom: 20px;
+      width: 100%;
+      object-fit: contain;
+      position: relative;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-container">
+    <img src="top.jpg" alt="Header Image" class="header-img">
+    <button class="back-button" onclick="window.location.href='index.html'">←</button>
+  </div>
+
+  <input type="file" id="fileInput" style="display: none;" accept="image/*">
+  <div class="upload-box" id="uploadBox" onclick="selectFile()">
+    <span id="uploadText">Нажмите для загрузки изображения</span>
+  </div>
+
+  <img src="bottom2.jpg" alt="Bottom Image" class="bottom-img">
+
+  <script>
+    // При загрузке страницы проверяем, сохранено ли уже изображение в localStorage
+    document.addEventListener("DOMContentLoaded", function() {
+      const savedImage = localStorage.getItem("uploadedImage");
+      const uploadBox = document.getElementById("uploadBox");
+      if (savedImage) {
+        uploadBox.innerHTML = `<img id="zoomableImage" src="${savedImage}" alt="Uploaded Image">`;
+        // Отключаем повторную загрузку
+        uploadBox.onclick = null;
+        const img = document.getElementById("zoomableImage");
+        enableZoom(img);
+      } else {
+        uploadBox.innerHTML = `<span id="uploadText">Нажмите для загрузки изображения</span>`;
+        uploadBox.onclick = selectFile;
+      }
+    });
+
+    // Имитируем клик по скрытому input
+    function selectFile() {
+      document.getElementById("fileInput").click();
+    }
+
+    // Обработка загрузки файла
+    document.getElementById("fileInput").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const uploadBox = document.getElementById("uploadBox");
+          uploadBox.innerHTML = `<img id="zoomableImage" src="${e.target.result}" alt="Uploaded Image">`;
+          localStorage.setItem("uploadedImage", e.target.result);
+          // Отключаем повторную загрузку
+          uploadBox.onclick = null;
+          const img = document.getElementById("zoomableImage");
+          enableZoom(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Функция подключения зумирования для изображения
+function enableZoom(img) {
+    let scale = 1, posX = 0, posY = 0;
+    let startX = 0, startY = 0;
+    let lastX = 0, lastY = 0;
+    let isDragging = false;
+    let initialDistance = null;
+    let initialScale = scale;
+
+    img.style.transformOrigin = "center center";
+    img.style.transform = `translate(0px, 0px) scale(1)`;
+
+    // Функция обновления трансформации
+    function updateTransform() {
+        img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+    }
+
+    // Колесико мыши для увеличения (ПК)
+    img.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        let rect = img.getBoundingClientRect();
+        let offsetX = (e.clientX - rect.left) / rect.width;
+        let offsetY = (e.clientY - rect.top) / rect.height;
+
+        let delta = e.deltaY < 0 ? 0.1 : -0.1;
+        let newScale = scale + delta;
+        newScale = Math.min(Math.max(newScale, 1), 3);
+
+        // Изменение позиции для сохранения точки зума
+        posX -= (offsetX - 0.5) * img.width * delta * 2;
+        posY -= (offsetY - 0.5) * img.height * delta * 2;
+
+        scale = newScale;
+        updateTransform();
+    });
+
+    // Начало перемещения (ПК)
+    img.addEventListener('mousedown', function(e) {
+        if (scale > 1) {
+            isDragging = true;
+            startX = e.clientX - posX;
+            startY = e.clientY - posY;
+        }
+    });
+
+    img.addEventListener('mousemove', function(e) {
+        if (isDragging) {
+            posX = e.clientX - startX;
+            posY = e.clientY - startY;
+            updateTransform();
+        }
+    });
+
+    img.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+
+    img.addEventListener('mouseleave', function() {
+        isDragging = false;
+    });
+
+    // Поддержка жеста "щипок" (pinch-to-zoom) на мобильных устройствах
+    img.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 2) {
+            initialDistance = getDistance(e.touches[0], e.touches[1]);
+            initialScale = scale;
+            lastX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            lastY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        } else if (e.touches.length === 1 && scale > 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX - posX;
+            startY = e.touches[0].clientY - posY;
+        }
+    });
+
+    img.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 2 && initialDistance) {
+            let newDistance = getDistance(e.touches[0], e.touches[1]);
+            let newScale = initialScale * (newDistance / initialDistance);
+
+            newScale = Math.min(Math.max(newScale, 1), 3);
+
+            let centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            let centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+            posX -= (centerX - lastX) * (newScale - scale);
+            posY -= (centerY - lastY) * (newScale - scale);
+
+            scale = newScale;
+            lastX = centerX;
+            lastY = centerY;
+
+            updateTransform();
+        } else if (e.touches.length === 1 && isDragging) {
+            posX = e.touches[0].clientX - startX;
+            posY = e.touches[0].clientY - startY;
+            updateTransform();
+        }
+    });
+
+    img.addEventListener('touchend', function(e) {
+        if (e.touches.length < 2) {
+            initialDistance = null;
+            isDragging = false;
+        }
+    });
+
+    // Двойной тап для сброса зума
+    let lastTap = 0;
+    img.addEventListener('touchend', function(e) {
+        let currentTime = new Date().getTime();
+        let tapLength = currentTime - lastTap;
+
+        if (tapLength < 300 && tapLength > 0) {
+            scale = 1;
+            posX = 0;
+            posY = 0;
+            updateTransform();
+        }
+        lastTap = currentTime;
+    });
+
+    // Функция для расчета расстояния между двумя точками касания
+    function getDistance(touch1, touch2) {
+        let dx = touch2.clientX - touch1.clientX;
+        let dy = touch2.clientY - touch1.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+}
+
+
+
+  </script>
+</body>
+</html>

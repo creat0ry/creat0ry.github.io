@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="eGov mobile">
+  <title>eGov mobile</title>
+  <style>
+    /* Сброс стилей */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+    /* Контейнер для фонового изображения */
+    .full-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden; /* чтобы изображение не выходило за пределы контейнера */
+    }
+    /* Фоновое изображение */
+    .full-screen img.bg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;        /* масштабирует изображение, сохраняя пропорции */
+      object-position: top center; /* сдвиг по вертикали: вверх на 50px */
+    }
+    /* Центрирование кнопки */
+    .button-container {
+      position: absolute;
+      top: 43.1%;
+      left: 44%;
+      transform: translate(-50%, -50%);
+    }
+    /* Стили для изображения-кнопки */
+    .button-container img {
+      width: 51vw;
+      max-width: 450px;
+      min-width: 200px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="full-screen">
+    <img class="bg" src="mainscreen.jpg" alt="Background Image">
+    <div class="button-container">
+      <a href="kaspi3.html">
+        <img src="button.png" alt="Button">
+      </a>
+    </div>
+  </div>
+</body>
+</html>
